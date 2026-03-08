@@ -31,6 +31,7 @@ class UserResponse(BaseModel):
     role: str
     is_active: bool
     timezone: Optional[str] = None
+    permissions: list[str] = []
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

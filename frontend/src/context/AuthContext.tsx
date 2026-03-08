@@ -8,6 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  hasRole: (...roles: string[]) => boolean;
+  hasPermission: (...permissions: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,6 +18,8 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   login: async () => {},
   logout: () => {},
+  hasRole: () => false,
+  hasPermission: () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -49,8 +53,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
   }, []);
 
+  const hasRole = useCallback((...roles: string[]) => {
+    return !!user?.role && roles.includes(user.role);
+  }, [user]);
+
+  const hasPermission = useCallback((...permissions: string[]) => {
+    return !!user?.permissions && permissions.some(p => user.permissions!.includes(p));
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout, hasRole, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

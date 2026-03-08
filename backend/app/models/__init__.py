@@ -7,9 +7,11 @@ from app.models.comment import Comment
 from app.models.sla import SLAPolicy, SLARecord
 from app.models.notification import Notification, EscalationRule
 from app.models.audit import AuditLog
+from app.models.permission import Permission, RolePermission
 
 __all__ = [
     "User", "Role",
+    "Permission", "RolePermission",
     "Team", "TeamMembership",
     "Project",
     "Ticket",

@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     escalation_rules,
     audit,
     health,
+    permissions,
 )
 
 api_v1_router = APIRouter()
@@ -29,3 +30,4 @@ api_v1_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashb
 api_v1_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 api_v1_router.include_router(escalation_rules.router, prefix="/escalation-rules", tags=["Escalation Rules"])
 api_v1_router.include_router(audit.router, prefix="/audit", tags=["Audit & Compliance"])
+api_v1_router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])

@@ -4,6 +4,7 @@ import { Table, Button, Tag, Space, Input, Select, Typography, Card } from 'antd
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { getTickets } from '../api/tickets';
+import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
@@ -17,6 +18,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 const TicketsPage = () => {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [filters, setFilters] = useState<Record<string, unknown>>({ page: 1, per_page: 20 });
 
   const { data, isLoading } = useQuery({
@@ -61,9 +63,11 @@ const TicketsPage = () => {
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={3} style={{ margin: 0 }}>Tickets</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/tickets/new')}>
-          Create Ticket
-        </Button>
+        {hasRole('admin', 'manager', 'engineer') && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/tickets/new')}>
+            Create Ticket
+          </Button>
+        )}
       </div>
 
       <Card style={{ marginBottom: 16 }}>

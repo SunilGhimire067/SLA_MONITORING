@@ -16,6 +16,7 @@ const ProjectsPage = () => {
   const createMutation = useMutation({
     mutationFn: createProject,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['projects'] }); setShowModal(false); form.resetFields(); message.success('Project created'); },
+    onError: (err: any) => message.error(err.response?.data?.detail || 'Failed to create project'),
   });
 
   const columns = [
@@ -35,7 +36,7 @@ const ProjectsPage = () => {
         <Table dataSource={projects || []} columns={columns} rowKey="id" loading={isLoading} pagination={false} />
       </Card>
 
-      <Modal title="Create Project" open={showModal} onCancel={() => setShowModal(false)} onOk={() => form.submit()}>
+      <Modal title="Create Project" open={showModal} onCancel={() => setShowModal(false)} onOk={() => form.submit()} confirmLoading={createMutation.isPending}>
         <Form form={form} layout="vertical" onFinish={(values) => createMutation.mutate(values)}>
           <Form.Item name="name" label="Project Name" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="key" label="Project Key" rules={[{ required: true }]} extra="Short unique key (e.g., INFRA, DEVOPS)"><Input maxLength={10} style={{ textTransform: 'uppercase' }} /></Form.Item>

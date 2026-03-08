@@ -26,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const { getBackground } = useTheme();
 
   const { data: unreadData } = useQuery({
@@ -35,23 +35,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     refetchInterval: 30000,
   });
 
-  const menuItems = [
-    { key: '/', icon: <DashboardOutlined />, label: 'Dashboard' },
-    { key: '/tickets', icon: <FileTextOutlined />, label: 'Tickets' },
-    { key: '/projects', icon: <ProjectOutlined />, label: 'Projects' },
-    { key: '/users', icon: <UserOutlined />, label: 'Users' },
-    { key: '/teams', icon: <TeamOutlined />, label: 'Teams' },
+  const allMenuItems = [
+    { key: '/', icon: <DashboardOutlined />, label: 'Dashboard', roles: ['admin', 'manager', 'engineer', 'viewer'] },
+    { key: '/tickets', icon: <FileTextOutlined />, label: 'Tickets', roles: ['admin', 'manager', 'engineer', 'viewer'] },
+    { key: '/projects', icon: <ProjectOutlined />, label: 'Projects', roles: ['admin', 'manager'] },
+    { key: '/users', icon: <UserOutlined />, label: 'Users', roles: ['admin'] },
+    { key: '/teams', icon: <TeamOutlined />, label: 'Teams', roles: ['admin', 'manager'] },
     {
       key: 'sla', icon: <SafetyCertificateOutlined />, label: 'SLA',
+      roles: ['admin', 'manager', 'engineer', 'viewer'],
       children: [
         { key: '/dashboard/sla', label: 'SLA Dashboard' },
-        { key: '/sla/config', label: 'SLA Config' },
+        ...(hasRole('admin', 'manager') ? [{ key: '/sla/config', label: 'SLA Config' }] : []),
       ],
     },
-    { key: '/notifications', icon: <BellOutlined />, label: 'Notifications' },
-    { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs' },
-    { key: '/settings', icon: <SettingOutlined />, label: 'Settings' },
+    { key: '/notifications', icon: <BellOutlined />, label: 'Notifications', roles: ['admin', 'manager', 'engineer', 'viewer'] },
+    { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs', roles: ['admin', 'manager'] },
+    { key: '/roles', icon: <SafetyCertificateOutlined />, label: 'Role Permissions', roles: ['admin'] },
+    { key: '/settings', icon: <SettingOutlined />, label: 'Settings', roles: ['admin', 'manager', 'engineer', 'viewer'] },
   ];
+
+  const menuItems = allMenuItems.filter((item) => item.roles.some((r) => hasRole(r)));
 
   const userMenu = {
     items: [
@@ -180,7 +184,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           marginLeft: collapsed ? 72 : 260,
           background: 'transparent',
           transition: 'margin-left 0.3s cubic-bezier(0.2, 0, 0, 1)',
-          minHeight: '100vh',
+          height: '100vh',
+          overflowY: 'auto',
         }}>
           {/* Glass Header */}
           <div style={{

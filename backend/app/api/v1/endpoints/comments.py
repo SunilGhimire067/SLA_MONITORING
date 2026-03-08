@@ -78,9 +78,11 @@ async def add_comment(
 
         # Update SLA response tracking
         if ticket.sla_record and ticket.sla_record.response_met is None:
-            minutes = int((now - ticket.created_at).total_seconds() / 60)
+            created_at = ticket.created_at.replace(tzinfo=timezone.utc) if ticket.created_at.tzinfo is None else ticket.created_at
+            minutes = int((now - created_at).total_seconds() / 60)
             ticket.sla_record.actual_response_minutes = minutes
-            ticket.sla_record.response_met = now <= ticket.sla_record.response_deadline
+            response_deadline = ticket.sla_record.response_deadline.replace(tzinfo=timezone.utc) if ticket.sla_record.response_deadline.tzinfo is None else ticket.sla_record.response_deadline
+            ticket.sla_record.response_met = now <= response_deadline
 
     await db.commit()
     await db.refresh(comment)

@@ -76,8 +76,8 @@ def _ticket_to_response(ticket: Ticket) -> TicketResponse:
         project_key=ticket.project.key if ticket.project else None,
         title=ticket.title,
         description=ticket.description,
-        priority=ticket.priority.value,
-        status=ticket.status.value,
+        priority=ticket.priority.value if hasattr(ticket.priority, 'value') else ticket.priority,
+        status=ticket.status.value if hasattr(ticket.status, 'value') else ticket.status,
         reporter_id=ticket.reporter_id,
         reporter_name=ticket.reporter.full_name if ticket.reporter else None,
         assignee_id=ticket.assignee_id,
@@ -304,9 +304,11 @@ async def transition_status(
         ticket.resolved_at = now
         # Check resolution SLA
         if ticket.sla_record and ticket.sla_record.resolution_met is None:
-            minutes = int((now - ticket.created_at).total_seconds() / 60)
+            created_at = ticket.created_at.replace(tzinfo=timezone.utc) if ticket.created_at.tzinfo is None else ticket.created_at
+            minutes = int((now - created_at).total_seconds() / 60)
             ticket.sla_record.actual_resolution_minutes = minutes
-            ticket.sla_record.resolution_met = now <= ticket.sla_record.resolution_deadline
+            resolution_deadline = ticket.sla_record.resolution_deadline.replace(tzinfo=timezone.utc) if ticket.sla_record.resolution_deadline.tzinfo is None else ticket.sla_record.resolution_deadline
+            ticket.sla_record.resolution_met = now <= resolution_deadline
     elif new_status == TicketStatus.CLOSED:
         ticket.closed_at = now
 

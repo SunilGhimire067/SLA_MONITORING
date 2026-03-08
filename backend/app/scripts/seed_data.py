@@ -15,6 +15,7 @@ from app.models.project import Project
 from app.models.ticket import Ticket
 from app.models.comment import Comment
 from app.models.sla import SLAPolicy, SLARecord
+from app.models.permission import Permission, RolePermission
 
 logger = logging.getLogger(__name__)
 
@@ -163,9 +164,50 @@ async def seed_demo_data(db: AsyncSession):
     logger.info(f"Seeded {len(tickets_data)} demo tickets.")
 
 
+async def seed_permissions(db: AsyncSession):
+    existing = (await db.execute(select(Permission))).scalars().all()
+    if existing:
+        logger.info("Permissions already exist, skipping.")
+        return
+
+    perms = [
+        Permission(name="manage_users", description="Create, edit, delete users", category="users"),
+        Permission(name="manage_projects", description="Create, edit, delete projects", category="projects"),
+        Permission(name="manage_teams", description="Create, edit, delete teams", category="teams"),
+        Permission(name="create_tickets", description="Create new tickets", category="tickets"),
+        Permission(name="view_tickets", description="View tickets and details", category="tickets"),
+        Permission(name="manage_sla", description="Configure SLA policies", category="sla"),
+        Permission(name="view_sla", description="View SLA dashboard", category="sla"),
+        Permission(name="view_audit", description="View audit logs", category="audit"),
+        Permission(name="manage_roles", description="Manage role permissions", category="roles"),
+    ]
+    db.add_all(perms)
+    await db.flush()
+
+    perm_map = {p.name: p.id for p in perms}
+    roles = {r.name: r for r in (await db.execute(select(Role))).scalars().all()}
+
+    # Default role-permission mappings
+    role_perms = {
+        "admin": list(perm_map.keys()),
+        "manager": ["manage_projects", "manage_teams", "create_tickets", "view_tickets", "manage_sla", "view_sla", "view_audit"],
+        "engineer": ["create_tickets", "view_tickets", "view_sla"],
+        "viewer": ["view_tickets", "view_sla"],
+    }
+
+    for role_name, perm_names in role_perms.items():
+        if role_name in roles:
+            for perm_name in perm_names:
+                db.add(RolePermission(role_id=roles[role_name].id, permission_id=perm_map[perm_name]))
+
+    await db.commit()
+    logger.info("Seeded permissions and role-permission mappings.")
+
+
 async def run_seed():
     async with async_session_factory() as db:
         await seed_roles(db)
+        await seed_permissions(db)
         await seed_sla_policies(db)
         await seed_demo_data(db)
 

@@ -6,8 +6,23 @@ export interface User {
   role: string;
   is_active: boolean;
   timezone?: string;
+  permissions?: string[];
   created_at?: string;
   updated_at?: string;
+}
+
+export interface PermissionItem {
+  id: number;
+  name: string;
+  description?: string;
+  category?: string;
+}
+
+export interface RoleWithPermissions {
+  id: number;
+  name: string;
+  description?: string;
+  permissions: PermissionItem[];
 }
 
 export interface Team {

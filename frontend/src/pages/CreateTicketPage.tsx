@@ -34,7 +34,7 @@ const CreateTicketPage = () => {
         <Title level={3}>Create Ticket</Title>
       </div>
       <Card style={{ maxWidth: 700 }}>
-        <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values)} initialValues={{ priority: 'P3' }}>
+        <Form form={form} layout="vertical" onFinish={(values) => { if (!mutation.isPending) mutation.mutate(values); }} initialValues={{ priority: 'P3' }}>
           <Form.Item name="project_id" label="Project" rules={[{ required: true }]}>
             <Select placeholder="Select project" options={(projects || []).map((p) => ({ value: p.id, label: `${p.key} - ${p.name}` }))} />
           </Form.Item>

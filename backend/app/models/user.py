@@ -13,6 +13,7 @@ class Role(Base):
     created_at = Column(DateTime(timezone=True))
 
     users = relationship("User", back_populates="role")
+    permissions = relationship("Permission", secondary="role_permissions", back_populates="roles")
 
 
 class User(Base, TimestampMixin):
