@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_user, require_roles
 from app.models.user import User
 from app.models.ticket import Ticket
 from app.models.comment import Comment
@@ -52,7 +52,7 @@ async def add_comment(
     ticket_id: int,
     data: CommentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("admin", "manager", "engineer")),
 ):
     # Verify ticket exists
     result = await db.execute(

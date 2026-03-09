@@ -4,6 +4,7 @@ import { Card, Descriptions, Tag, Button, Space, Timeline, Input, Checkbox, mess
 import { ArrowLeftOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTicket, getComments, transitionStatus, addComment } from '../api/tickets';
+import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -18,6 +19,8 @@ const TicketDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { hasRole } = useAuth();
+  const canWrite = hasRole('admin', 'manager', 'engineer');
   const [commentBody, setCommentBody] = useState('');
   const [isInternal, setIsInternal] = useState(false);
 
@@ -68,17 +71,19 @@ const TicketDetailPage = () => {
           </Card>
 
           {/* Status Transitions */}
-          <Card title="Actions" style={{ marginTop: 16 }}>
-            <Space wrap>
-              {(TRANSITIONS[ticket.status] || []).map((s) => (
-                <Button key={s} type={s === 'resolved' ? 'primary' : 'default'}
-                        danger={s === 'blocked'} onClick={() => statusMutation.mutate(s)}
-                        loading={statusMutation.isPending}>
-                  {s.replace('_', ' ').toUpperCase()}
-                </Button>
-              ))}
-            </Space>
-          </Card>
+          {canWrite && (
+            <Card title="Actions" style={{ marginTop: 16 }}>
+              <Space wrap>
+                {(TRANSITIONS[ticket.status] || []).map((s) => (
+                  <Button key={s} type={s === 'resolved' ? 'primary' : 'default'}
+                          danger={s === 'blocked'} onClick={() => statusMutation.mutate(s)}
+                          loading={statusMutation.isPending}>
+                    {s.replace('_', ' ').toUpperCase()}
+                  </Button>
+                ))}
+              </Space>
+            </Card>
+          )}
 
           {/* Comments */}
           <Card title="Comments" style={{ marginTop: 16 }}>
@@ -93,14 +98,18 @@ const TicketDetailPage = () => {
                 </div>
               ),
             }))} />
-            <Divider />
-            <TextArea rows={3} value={commentBody} onChange={(e) => setCommentBody(e.target.value)} placeholder="Add a comment..." />
-            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
-              <Checkbox checked={isInternal} onChange={(e) => setIsInternal(e.target.checked)}>Internal note</Checkbox>
-              <Button type="primary" onClick={() => commentMutation.mutate()} disabled={!commentBody.trim()} loading={commentMutation.isPending}>
-                Add Comment
-              </Button>
-            </div>
+            {canWrite && (
+              <>
+                <Divider />
+                <TextArea rows={3} value={commentBody} onChange={(e) => setCommentBody(e.target.value)} placeholder="Add a comment..." />
+                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+                  <Checkbox checked={isInternal} onChange={(e) => setIsInternal(e.target.checked)}>Internal note</Checkbox>
+                  <Button type="primary" onClick={() => commentMutation.mutate()} disabled={!commentBody.trim()} loading={commentMutation.isPending}>
+                    Add Comment
+                  </Button>
+                </div>
+              </>
+            )}
           </Card>
         </Col>
 
