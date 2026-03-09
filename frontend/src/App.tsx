@@ -50,7 +50,7 @@ function App() {
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/audit" element={<RoleRoute roles={['admin', 'manager']}><AuditLogPage /></RoleRoute>} />
                 <Route path="/roles" element={<RoleRoute roles={['admin']}><RolePermissionsPage /></RoleRoute>} />
-                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/settings" element={<RoleRoute roles={['admin', 'manager']}><SettingsPage /></RoleRoute>} />
               </Routes>
             </Layout>
           </ProtectedRoute>

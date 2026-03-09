@@ -4,6 +4,7 @@ import { Table, Button, Tag, Space, Input, Select, Typography, Card } from 'antd
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { getTickets } from '../api/tickets';
+import { getUsers } from '../api/users';
 import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 
@@ -24,6 +25,11 @@ const TicketsPage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['tickets', filters],
     queryFn: () => getTickets(filters),
+  });
+
+  const { data: usersData } = useQuery({
+    queryKey: ['users', 'assignee-list'],
+    queryFn: () => getUsers({ per_page: 100, is_active: true }),
   });
 
   const columns = [
@@ -91,6 +97,12 @@ const TicketsPage = () => {
                     { value: 'P3', label: 'P3' },
                     { value: 'P4', label: 'P4' },
                   ]} />
+          <Select placeholder="Assignee" allowClear showSearch optionFilterProp="label" style={{ width: 180 }}
+                  onChange={(v) => setFilters({ ...filters, assignee_id: v, page: 1 })}
+                  options={(usersData?.items || []).map((u: any) => ({
+                    value: u.id,
+                    label: `${u.first_name} ${u.last_name}`,
+                  }))} />
         </Space>
       </Card>
 

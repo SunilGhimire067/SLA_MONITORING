@@ -54,7 +54,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { key: '/notifications', icon: <BellOutlined />, label: 'Notifications', roles: ['admin', 'manager', 'engineer', 'viewer'] },
     { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs', roles: ['admin', 'manager'] },
     { key: '/roles', icon: <LockOutlined />, label: 'Role Permissions', roles: ['admin'] },
-    { key: '/settings', icon: <SettingOutlined />, label: 'Settings', roles: ['admin', 'manager', 'engineer', 'viewer'] },
+    { key: '/settings', icon: <SettingOutlined />, label: 'Settings', roles: ['admin', 'manager'] },
   ];
 
   const menuItems = allMenuItems.filter((item) => item.roles.some((r) => hasRole(r)));
