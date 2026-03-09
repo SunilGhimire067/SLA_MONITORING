@@ -11,9 +11,11 @@ import {
   BellOutlined,
   AuditOutlined,
   SafetyCertificateOutlined,
+  LockOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,7 +29,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, hasRole } = useAuth();
-  const { getBackground } = useTheme();
+  const { getBackground, settings } = useTheme();
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread'],
@@ -51,7 +53,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     },
     { key: '/notifications', icon: <BellOutlined />, label: 'Notifications', roles: ['admin', 'manager', 'engineer', 'viewer'] },
     { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs', roles: ['admin', 'manager'] },
-    { key: '/roles', icon: <SafetyCertificateOutlined />, label: 'Role Permissions', roles: ['admin'] },
+    { key: '/roles', icon: <LockOutlined />, label: 'Role Permissions', roles: ['admin'] },
     { key: '/settings', icon: <SettingOutlined />, label: 'Settings', roles: ['admin', 'manager', 'engineer', 'viewer'] },
   ];
 
@@ -77,6 +79,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Animated background orbs */}
       <div className="app-background" />
       <div className="orb-3" />
+      <div className="orb-4" />
+
+      {/* Background image overlay */}
+      {settings.showBgImage && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundImage: 'url(/background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: settings.bgImageOpacity,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }} />
+      )}
 
       <AntLayout style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
         {/* Glass Sidebar */}
@@ -88,10 +106,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           collapsedWidth={72}
           className="glass-sidebar"
           style={{
-            background: 'rgba(255, 255, 255, var(--glass-opacity, 0.12))',
-            backdropFilter: 'blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 1.8))',
-            WebkitBackdropFilter: 'blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 1.8))',
-            borderRight: '1px solid rgba(255, 255, 255, var(--glass-border-opacity, 0.18))',
+            background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 50%, rgba(15, 12, 40, 0.3) 100%)',
+            backdropFilter: 'blur(24px) saturate(1.6)',
+            WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+            borderRight: '1px solid rgba(129, 140, 248, 0.1)',
             position: 'fixed',
             left: 0,
             top: 0,
@@ -102,44 +120,52 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         >
           {/* Logo */}
           <div style={{
-            height: 64,
+            height: 68,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            padding: '0 16px',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            borderBottom: '1px solid rgba(129, 140, 248, 0.08)',
+            padding: collapsed ? '0' : '0 20px',
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
+              gap: 12,
               overflow: 'hidden',
             }}>
               <div style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(168, 85, 247, 0.8))',
+                width: 38,
+                height: 38,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 16,
-                fontWeight: 700,
-                color: '#fff',
                 flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
               }}>
-                IT
+                <ThunderboltOutlined style={{ fontSize: 18, color: '#fff' }} />
               </div>
               {!collapsed && (
-                <Typography.Text strong style={{
-                  color: 'rgba(255, 255, 255, 0.95)',
-                  fontSize: 16,
-                  letterSpacing: '-0.3px',
-                  whiteSpace: 'nowrap',
-                }}>
-                  ITSM Platform
-                </Typography.Text>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                  <Typography.Text strong style={{
+                    color: '#fff',
+                    fontSize: 15,
+                    letterSpacing: '-0.3px',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    DevOps ITSM
+                  </Typography.Text>
+                  <Typography.Text style={{
+                    color: 'rgba(165, 180, 252, 0.7)',
+                    fontSize: 10,
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    SLA Monitoring
+                  </Typography.Text>
+                </div>
               )}
             </div>
           </div>
@@ -153,7 +179,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             style={{
               background: 'transparent',
               border: 'none',
-              padding: '8px 0',
+              padding: '12px 0',
             }}
           />
 
@@ -170,8 +196,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              color: 'rgba(255, 255, 255, 0.5)',
+              borderTop: '1px solid rgba(129, 140, 248, 0.08)',
+              color: 'rgba(165, 180, 252, 0.5)',
               transition: 'color 0.3s, background 0.3s',
             }}
           >
@@ -190,37 +216,50 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {/* Glass Header */}
           <div style={{
             height: 64,
-            padding: '0 28px',
+            padding: '0 32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'rgba(255, 255, 255, calc(var(--glass-opacity, 0.12) * 0.5))',
-            backdropFilter: 'blur(calc(var(--glass-blur, 20px) * 0.8))',
-            WebkitBackdropFilter: 'blur(calc(var(--glass-blur, 20px) * 0.8))',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'rgba(15, 12, 40, 0.4)',
+            backdropFilter: 'blur(16px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+            borderBottom: '1px solid rgba(129, 140, 248, 0.06)',
             position: 'sticky',
             top: 0,
             zIndex: 50,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Typography.Text style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: 13 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: '#10b981',
+                boxShadow: '0 0 8px rgba(16, 185, 129, 0.5)',
+              }} />
+              <Typography.Text style={{ color: 'rgba(165, 180, 252, 0.6)', fontSize: 13, fontWeight: 500 }}>
                 {location.pathname === '/' ? 'Dashboard' : location.pathname.replace('/', '').replace(/\//g, ' / ').replace(/(^|\s)\S/g, t => t.toUpperCase())}
               </Typography.Text>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <Tooltip title="Notifications">
                 <Badge count={unreadData?.unread_count || 0} size="small" offset={[-2, 2]}>
-                  <BellOutlined
+                  <div
                     onClick={() => navigate('/notifications')}
                     style={{
-                      fontSize: 18,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      background: 'rgba(129, 140, 248, 0.08)',
+                      border: '1px solid rgba(129, 140, 248, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       cursor: 'pointer',
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      padding: 8,
-                      borderRadius: 8,
                       transition: 'all 0.2s',
                     }}
-                  />
+                  >
+                    <BellOutlined style={{ fontSize: 16, color: 'rgba(165, 180, 252, 0.7)' }} />
+                  </div>
                 </Badge>
               </Tooltip>
               <Dropdown menu={userMenu} placement="bottomRight">
@@ -229,10 +268,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
-                  padding: '4px 12px 4px 4px',
+                  padding: '4px 14px 4px 4px',
                   borderRadius: 24,
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(129, 140, 248, 0.08)',
+                  border: '1px solid rgba(129, 140, 248, 0.1)',
                   transition: 'all 0.2s',
                 }}>
                   <Avatar
@@ -240,10 +279,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     size={32}
                     style={{
                       background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                      boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+                      boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)',
                     }}
                   />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: 13 }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 13, fontWeight: 500 }}>
                     {user?.first_name}
                   </span>
                 </div>
@@ -252,7 +291,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
 
           {/* Page Content */}
-          <Content className="page-content" style={{ padding: 28 }}>
+          <Content className="page-content" style={{ padding: 32 }}>
             {children}
           </Content>
         </AntLayout>

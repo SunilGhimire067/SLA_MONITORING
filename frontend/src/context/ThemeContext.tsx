@@ -7,24 +7,29 @@ export interface GlassSettings {
   saturation: number;
   backgroundPreset: string;
   darkMode: boolean;
+  showBgImage: boolean;
+  bgImageOpacity: number;
 }
 
 const DEFAULT_SETTINGS: GlassSettings = {
   blur: 20,
-  opacity: 0.12,
-  borderOpacity: 0.18,
+  opacity: 0.1,
+  borderOpacity: 0.15,
   saturation: 1.8,
-  backgroundPreset: 'aurora',
+  backgroundPreset: 'devops',
   darkMode: true,
+  showBgImage: true,
+  bgImageOpacity: 0.15,
 };
 
 const BACKGROUND_PRESETS: Record<string, string> = {
+  devops: 'linear-gradient(135deg, #0d0b2e 0%, #1a1154 30%, #2d1b69 60%, #1a1040 100%)',
   aurora: 'linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 100%)',
-  ocean: 'linear-gradient(135deg, #0c1445 0%, #1a3a6b 40%, #0d2137 100%)',
-  midnight: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 40%, #16213e 100%)',
+  ocean: 'linear-gradient(135deg, #0c1445 0%, #152a5c 40%, #0d2137 100%)',
+  midnight: 'linear-gradient(135deg, #080818 0%, #141428 40%, #1a1a3e 100%)',
   cosmic: 'linear-gradient(135deg, #12002e 0%, #3d0066 40%, #1a0033 100%)',
-  forest: 'linear-gradient(135deg, #0a1a0a 0%, #1a3a2e 40%, #0d2117 100%)',
-  slate: 'linear-gradient(135deg, #1e293b 0%, #334155 40%, #1e293b 100%)',
+  emerald: 'linear-gradient(135deg, #021a0a 0%, #0a3a2e 40%, #062017 100%)',
+  slate: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%)',
 };
 
 interface ThemeContextType {
@@ -40,7 +45,7 @@ const ThemeContext = createContext<ThemeContextType>({
   updateSettings: () => {},
   resetSettings: () => {},
   backgroundPresets: BACKGROUND_PRESETS,
-  getBackground: () => BACKGROUND_PRESETS.aurora,
+  getBackground: () => BACKGROUND_PRESETS.devops,
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -65,7 +70,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const getBackground = useCallback(() => {
-    return BACKGROUND_PRESETS[settings.backgroundPreset] || BACKGROUND_PRESETS.aurora;
+    return BACKGROUND_PRESETS[settings.backgroundPreset] || BACKGROUND_PRESETS.devops;
   }, [settings.backgroundPreset]);
 
   useEffect(() => {
