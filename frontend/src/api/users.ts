@@ -25,3 +25,8 @@ export const deactivateUser = async (id: number) => {
   const { data } = await client.delete(`/users/${id}`);
   return data;
 };
+
+export const getAssignees = async () => {
+  const { data } = await client.get<{ id: number; first_name: string; last_name: string }[]>('/users/assignees');
+  return data;
+};

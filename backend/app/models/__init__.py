@@ -8,6 +8,7 @@ from app.models.sla import SLAPolicy, SLARecord
 from app.models.notification import Notification, EscalationRule
 from app.models.audit import AuditLog
 from app.models.permission import Permission, RolePermission
+from app.models.memo import Memo
 
 __all__ = [
     "User", "Role",
@@ -19,4 +20,5 @@ __all__ = [
     "SLAPolicy", "SLARecord",
     "Notification", "EscalationRule",
     "AuditLog",
+    "Memo",
 ]

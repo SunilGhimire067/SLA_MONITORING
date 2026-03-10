@@ -13,6 +13,22 @@ from app.schemas.common import PaginatedResponse
 router = APIRouter()
 
 
+@router.get("/assignees")
+async def list_assignees(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lightweight endpoint for assignee dropdowns - accessible to all authenticated users."""
+    result = await db.execute(
+        select(User).where(User.is_active == True).order_by(User.first_name)
+    )
+    users = result.scalars().all()
+    return [
+        {"id": u.id, "first_name": u.first_name, "last_name": u.last_name}
+        for u in users
+    ]
+
+
 @router.get("", response_model=PaginatedResponse)
 async def list_users(
     page: int = Query(1, ge=1),

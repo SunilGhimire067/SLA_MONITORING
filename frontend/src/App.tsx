@@ -15,6 +15,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import AuditLogPage from './pages/AuditLogPage';
 import SettingsPage from './pages/SettingsPage';
 import RolePermissionsPage from './pages/RolePermissionsPage';
+import MemosPage from './pages/MemosPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -50,6 +51,7 @@ function App() {
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/audit" element={<RoleRoute roles={['admin', 'manager']}><AuditLogPage /></RoleRoute>} />
                 <Route path="/roles" element={<RoleRoute roles={['admin']}><RolePermissionsPage /></RoleRoute>} />
+                <Route path="/memos" element={<MemosPage />} />
                 <Route path="/settings" element={<RoleRoute roles={['admin', 'manager']}><SettingsPage /></RoleRoute>} />
               </Routes>
             </Layout>

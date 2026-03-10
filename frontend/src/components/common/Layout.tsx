@@ -16,6 +16,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   ThunderboltOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -51,6 +52,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         ...(hasRole('admin', 'manager') ? [{ key: '/sla/config', label: 'SLA Config' }] : []),
       ],
     },
+    { key: '/memos', icon: <BookOutlined />, label: 'Memos', roles: ['admin', 'manager', 'engineer'] },
     { key: '/notifications', icon: <BellOutlined />, label: 'Notifications', roles: ['admin', 'manager', 'engineer', 'viewer'] },
     { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs', roles: ['admin', 'manager'] },
     { key: '/roles', icon: <LockOutlined />, label: 'Role Permissions', roles: ['admin'] },

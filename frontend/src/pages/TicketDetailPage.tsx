@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Descriptions, Tag, Button, Space, Timeline, Input, Checkbox, message, Typography, Row, Col, Divider, Spin } from 'antd';
-import { ArrowLeftOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getTicket, getComments, transitionStatus, addComment } from '../api/tickets';
+import { getTicket, getComments, transitionStatus, addComment, assignTicket } from '../api/tickets';
 import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 
@@ -19,7 +19,7 @@ const TicketDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { hasRole } = useAuth();
+  const { hasRole, user } = useAuth();
   const canWrite = hasRole('admin', 'manager', 'engineer');
   const [commentBody, setCommentBody] = useState('');
   const [isInternal, setIsInternal] = useState(false);
@@ -31,6 +31,12 @@ const TicketDetailPage = () => {
     mutationFn: (status: string) => transitionStatus(Number(id), status),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['ticket', id] }); message.success('Status updated'); },
     onError: (err: any) => message.error(err.response?.data?.detail || 'Failed to update status'),
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: () => assignTicket(Number(id), user!.id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['ticket', id] }); message.success('Ticket assigned to you'); },
+    onError: (err: any) => message.error(err.response?.data?.detail || 'Failed to assign ticket'),
   });
 
   const commentMutation = useMutation({
@@ -94,7 +100,11 @@ const TicketDetailPage = () => {
                   <Text strong>{c.author_name}</Text>
                   {c.is_internal && <Tag style={{ marginLeft: 8 }} color="default">Internal</Tag>}
                   <Text type="secondary" style={{ marginLeft: 8 }}>{dayjs(c.created_at).format('MMM DD, HH:mm')}</Text>
-                  <div style={{ marginTop: 4 }}>{c.body}</div>
+                  <div style={{ marginTop: 4 }}>
+                    {c.body.split('\n').map((line: string, i: number) => (
+                      <span key={i}>{line}{i < c.body.split('\n').length - 1 && <br />}</span>
+                    ))}
+                  </div>
                 </div>
               ),
             }))} />
@@ -117,7 +127,21 @@ const TicketDetailPage = () => {
           <Card title="Details">
             <Descriptions column={1} size="small">
               <Descriptions.Item label="Reporter">{ticket.reporter_name || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Assignee">{ticket.assignee_name || 'Unassigned'}</Descriptions.Item>
+              <Descriptions.Item label="Assignee">
+                {ticket.assignee_name || 'Unassigned'}
+                {!ticket.assignee_id && canWrite && (
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<UserAddOutlined />}
+                    onClick={() => assignMutation.mutate()}
+                    loading={assignMutation.isPending}
+                    style={{ marginLeft: 8, padding: 0 }}
+                  >
+                    Assign to me
+                  </Button>
+                )}
+              </Descriptions.Item>
               <Descriptions.Item label="Project">{ticket.project_key}</Descriptions.Item>
               <Descriptions.Item label="Created">{dayjs(ticket.created_at).format('MMM DD, YYYY HH:mm')}</Descriptions.Item>
               {ticket.first_response_at && <Descriptions.Item label="First Response">{dayjs(ticket.first_response_at).format('MMM DD, HH:mm')}</Descriptions.Item>}
