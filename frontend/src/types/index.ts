@@ -196,3 +196,71 @@ export interface TokenResponse {
   token_type: string;
   user: User;
 }
+
+// Migration Planner
+export interface MigrationPhase {
+  id: number;
+  service_id: number;
+  phase_type: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  progress: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MigrationDependency {
+  id: number;
+  service_id: number;
+  depends_on_id: number;
+  depends_on_name?: string;
+}
+
+export interface MigrationService {
+  id: number;
+  project_id: number;
+  name: string;
+  description?: string;
+  assignee_id?: number;
+  assignee_name?: string;
+  status: string;
+  expected_duration_days?: number;
+  start_date?: string;
+  end_date?: string;
+  order: number;
+  phases: MigrationPhase[];
+  dependencies: MigrationDependency[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MigrationProject {
+  id: number;
+  name: string;
+  description?: string;
+  owner_id?: number;
+  owner_name?: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  services: MigrationService[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MigrationProjectListItem {
+  id: number;
+  name: string;
+  description?: string;
+  owner_id?: number;
+  owner_name?: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  service_count: number;
+  overall_progress: number;
+  created_at: string;
+  updated_at: string;
+}

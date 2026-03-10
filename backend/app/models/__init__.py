@@ -9,6 +9,12 @@ from app.models.notification import Notification, EscalationRule
 from app.models.audit import AuditLog
 from app.models.permission import Permission, RolePermission
 from app.models.memo import Memo
+from app.models.migration import (
+    MigrationProject,
+    MigrationService,
+    MigrationPhase,
+    MigrationDependency,
+)
 
 __all__ = [
     "User", "Role",
@@ -21,4 +27,5 @@ __all__ = [
     "Notification", "EscalationRule",
     "AuditLog",
     "Memo",
+    "MigrationProject", "MigrationService", "MigrationPhase", "MigrationDependency",
 ]

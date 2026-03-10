@@ -55,6 +55,34 @@ class NotificationChannel(str, enum.Enum):
     TEAMS = "teams"
 
 
+class MigrationProjectStatus(str, enum.Enum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ON_HOLD = "on_hold"
+
+
+class MigrationPhaseType(str, enum.Enum):
+    PLANNING = "planning"
+    PREPARATION = "preparation"
+    MIGRATION = "migration"
+    VALIDATION = "validation"
+
+
+class MigrationPhaseStatus(str, enum.Enum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    BLOCKED = "blocked"
+
+
+class MigrationServiceStatus(str, enum.Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    BLOCKED = "blocked"
+
+
 class AuditAction(str, enum.Enum):
     CREATE = "create"
     UPDATE = "update"

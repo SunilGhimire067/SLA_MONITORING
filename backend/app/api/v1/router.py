@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     health,
     permissions,
     memos,
+    migration,
 )
 
 api_v1_router = APIRouter()
@@ -33,3 +34,4 @@ api_v1_router.include_router(escalation_rules.router, prefix="/escalation-rules"
 api_v1_router.include_router(audit.router, prefix="/audit", tags=["Audit & Compliance"])
 api_v1_router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 api_v1_router.include_router(memos.router, prefix="/memos", tags=["Memos"])
+api_v1_router.include_router(migration.router, prefix="/migration", tags=["Migration Planner"])
