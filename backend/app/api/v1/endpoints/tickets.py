@@ -335,7 +335,7 @@ async def assign_ticket(
     ticket_id: int,
     assignee_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "manager")),
+    current_user: User = Depends(require_roles("admin", "manager", "engineer")),
 ):
     result = await db.execute(
         select(Ticket).where(Ticket.id == ticket_id).options(
