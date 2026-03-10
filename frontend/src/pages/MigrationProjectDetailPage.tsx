@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Button, Typography, Tag, Space, Modal, Input, Select, DatePicker,
-  Progress, Collapse, Slider, Descriptions, Tooltip, message, Empty, Spin,
+  Progress, Collapse, Descriptions, Tooltip, message, Empty, Spin,
   Row, Col, Popconfirm,
 } from 'antd';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../api/migration';
 import { getAssignees } from '../api/users';
 import { useAuth } from '../context/AuthContext';
-import type { MigrationProject, MigrationService, MigrationPhase } from '../types';
+import type { MigrationProject, MigrationService } from '../types';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
@@ -113,10 +113,23 @@ const MigrationProjectDetailPage = () => {
   });
 
   const updatePhaseMut = useMutation({
-    mutationFn: ({ pid, payload }: { pid: number; payload: any }) =>
+    mutationFn: ({ pid, payload, serviceId }: { pid: number; payload: any; serviceId?: number }) =>
       updateMigrationPhase(pid, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['migration-project', id] });
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['migration-project', id] }).then(() => {
+        // Auto-complete service if all 4 phases are completed
+        if (variables.payload.status === 'completed' && variables.serviceId && project) {
+          const svc = project.services.find(s => s.id === variables.serviceId);
+          if (svc) {
+            const allCompleted = svc.phases.every(p =>
+              p.id === variables.pid ? variables.payload.status === 'completed' : p.status === 'completed'
+            );
+            if (allCompleted && svc.status !== 'completed') {
+              updateServiceMut.mutate({ sid: svc.id, payload: { status: 'completed' } });
+            }
+          }
+        }
+      });
       message.success('Phase updated');
     },
   });
@@ -161,8 +174,8 @@ const MigrationProjectDetailPage = () => {
 
   const calcServiceProgress = (svc: MigrationService) => {
     if (!svc.phases?.length) return 0;
-    const total = svc.phases.reduce((acc, p) => acc + (p.progress || 0), 0);
-    return Math.round(total / svc.phases.length);
+    const completed = svc.phases.filter(p => p.status === 'completed').length;
+    return Math.round((completed / svc.phases.length) * 100);
   };
 
   if (isLoading) {
@@ -293,7 +306,7 @@ const MigrationProjectDetailPage = () => {
                       return (
                         <Tooltip
                           key={phase.id}
-                          title={`${phase.phase_type.replace('_', ' ').toUpperCase()} - ${phase.progress}% - ${phase.status.replace('_', ' ')}`}
+                          title={`${phase.phase_type.replace('_', ' ').toUpperCase()} - ${phase.status.replace('_', ' ')}`}
                         >
                           <div
                             style={{
@@ -306,17 +319,6 @@ const MigrationProjectDetailPage = () => {
                               cursor: 'default',
                             }}
                           >
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: `${phase.progress}%`,
-                                background: 'rgba(255,255,255,0.25)',
-                                transition: 'width 0.3s',
-                              }}
-                            />
                             <div style={{
                               position: 'absolute',
                               inset: 0,
@@ -465,11 +467,6 @@ const MigrationProjectDetailPage = () => {
                                   {phase.status.replace('_', ' ')}
                                 </Tag>
                               </div>
-                              <Progress
-                                percent={phase.progress || 0}
-                                size="small"
-                                strokeColor={PHASE_COLORS[phase.phase_type]}
-                              />
                               {phase.notes && (
                                 <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4 }}>
                                   {phase.notes}
@@ -477,34 +474,20 @@ const MigrationProjectDetailPage = () => {
                               )}
                               {canWrite && (
                                 <div style={{ marginTop: 8 }}>
-                                  <Space size={8} direction="vertical" style={{ width: '100%' }}>
-                                    <Select
-                                      size="small"
-                                      value={phase.status}
-                                      style={{ width: '100%' }}
-                                      onChange={(val) =>
-                                        updatePhaseMut.mutate({ pid: phase.id, payload: { status: val } })
-                                      }
-                                      options={[
-                                        { label: 'Not Started', value: 'not_started' },
-                                        { label: 'In Progress', value: 'in_progress' },
-                                        { label: 'Completed', value: 'completed' },
-                                        { label: 'Blocked', value: 'blocked' },
-                                      ]}
-                                    />
-                                    <div>
-                                      <Text type="secondary" style={{ fontSize: 11 }}>Progress</Text>
-                                      <Slider
-                                        min={0}
-                                        max={100}
-                                        step={5}
-                                        value={phase.progress || 0}
-                                        onChange={(val) =>
-                                          updatePhaseMut.mutate({ pid: phase.id, payload: { progress: val } })
-                                        }
-                                      />
-                                    </div>
-                                  </Space>
+                                  <Select
+                                    size="small"
+                                    value={phase.status}
+                                    style={{ width: '100%' }}
+                                    onChange={(val) =>
+                                      updatePhaseMut.mutate({ pid: phase.id, payload: { status: val }, serviceId: svc.id })
+                                    }
+                                    options={[
+                                      { label: 'Not Started', value: 'not_started' },
+                                      { label: 'In Progress', value: 'in_progress' },
+                                      { label: 'Completed', value: 'completed' },
+                                      { label: 'Blocked', value: 'blocked' },
+                                    ]}
+                                  />
                                 </div>
                               )}
                             </Card>
