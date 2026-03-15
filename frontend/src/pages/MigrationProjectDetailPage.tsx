@@ -51,6 +51,7 @@ const MigrationProjectDetailPage = () => {
   const queryClient = useQueryClient();
   const { hasRole } = useAuth();
   const canWrite = hasRole('admin', 'manager', 'engineer');
+  const canEditProject = hasRole('admin', 'manager');
 
   const [editProjectOpen, setEditProjectOpen] = useState(false);
   const [addServiceOpen, setAddServiceOpen] = useState(false);
@@ -213,7 +214,7 @@ const MigrationProjectDetailPage = () => {
         </Space>
         <Space>
           <Button icon={<FilePdfOutlined />} onClick={handleExportPDF}>Export PDF</Button>
-          {canWrite && (
+          {canEditProject && (
             <Button
               type="primary"
               icon={<EditOutlined />}

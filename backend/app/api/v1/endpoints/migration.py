@@ -245,7 +245,7 @@ async def update_migration_project(
     project_id: int,
     data: MigrationProjectUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "manager", "engineer")),
+    current_user: User = Depends(require_roles("admin", "manager")),
 ):
     result = await db.execute(
         select(MigrationProject)

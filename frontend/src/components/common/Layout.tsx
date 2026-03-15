@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Layout as AntLayout, Menu, Avatar, Dropdown, Badge, Typography, Tooltip } from 'antd';
+import { Layout as AntLayout, Menu, Avatar, Dropdown, Badge, Typography, Tooltip, Modal, Input, message, Space } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -19,20 +19,51 @@ import {
   BookOutlined,
   RocketOutlined,
   ReadOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useQuery } from '@tanstack/react-query';
 import { getUnreadCount } from '../../api/notifications';
+import { changePassword } from '../../api/auth';
 
 const { Sider, Content } = AntLayout;
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [pwdModalOpen, setPwdModalOpen] = useState(false);
+  const [pwdForm, setPwdForm] = useState({ current: '', new: '', confirm: '' });
+  const [pwdLoading, setPwdLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, hasRole } = useAuth();
   const { getBackground, settings } = useTheme();
+
+  const handleChangePassword = async () => {
+    if (!pwdForm.current || !pwdForm.new || !pwdForm.confirm) {
+      message.warning('Please fill in all fields');
+      return;
+    }
+    if (pwdForm.new.length < 6) {
+      message.warning('New password must be at least 6 characters');
+      return;
+    }
+    if (pwdForm.new !== pwdForm.confirm) {
+      message.error('New passwords do not match');
+      return;
+    }
+    setPwdLoading(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.new);
+      message.success('Password changed successfully');
+      setPwdModalOpen(false);
+      setPwdForm({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      message.error(err?.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread'],
@@ -70,12 +101,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       { key: 'profile', label: `${user?.first_name} ${user?.last_name}`, disabled: true },
       { key: 'role', label: `Role: ${user?.role}`, disabled: true },
       { type: 'divider' as const },
+      { key: 'change-password', icon: <KeyOutlined />, label: 'Change Password' },
+      { type: 'divider' as const },
       { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', danger: true },
     ],
     onClick: ({ key }: { key: string }) => {
       if (key === 'logout') {
         logout();
         navigate('/login');
+      } else if (key === 'change-password') {
+        setPwdForm({ current: '', new: '', confirm: '' });
+        setPwdModalOpen(true);
       }
     },
   };
@@ -302,6 +338,50 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </Content>
         </AntLayout>
       </AntLayout>
+
+      {/* Change Password Modal */}
+      <Modal
+        title="Change Password"
+        open={pwdModalOpen}
+        onCancel={() => setPwdModalOpen(false)}
+        onOk={handleChangePassword}
+        okText="Change Password"
+        confirmLoading={pwdLoading}
+        width={420}
+      >
+        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <div>
+            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              Current Password
+            </Typography.Text>
+            <Input.Password
+              placeholder="Enter current password"
+              value={pwdForm.current}
+              onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })}
+            />
+          </div>
+          <div>
+            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              New Password
+            </Typography.Text>
+            <Input.Password
+              placeholder="Enter new password"
+              value={pwdForm.new}
+              onChange={(e) => setPwdForm({ ...pwdForm, new: e.target.value })}
+            />
+          </div>
+          <div>
+            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              Confirm New Password
+            </Typography.Text>
+            <Input.Password
+              placeholder="Confirm new password"
+              value={pwdForm.confirm}
+              onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })}
+            />
+          </div>
+        </Space>
+      </Modal>
     </div>
   );
 };
