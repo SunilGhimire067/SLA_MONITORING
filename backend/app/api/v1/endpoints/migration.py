@@ -104,16 +104,23 @@ def _project_response(proj: MigrationProject) -> MigrationProjectResponse:
     )
 
 
+def _calc_service_progress(svc) -> float:
+    """Calculate service progress based on completed phases (each phase = 25%)."""
+    phases = svc.phases or []
+    if not phases:
+        return 0.0
+    completed = sum(
+        1 for p in phases
+        if (p.status.value if hasattr(p.status, "value") else p.status) == "completed"
+    )
+    return round((completed / len(phases)) * 100, 1)
+
+
 def _calc_progress(services) -> float:
     if not services:
         return 0.0
-    total = 0.0
-    count = 0
-    for s in services:
-        for p in (s.phases or []):
-            total += (p.progress or 0.0)
-            count += 1
-    return round(total / count, 1) if count else 0.0
+    total = sum(_calc_service_progress(s) for s in services)
+    return round(total / len(services), 1)
 
 
 def _project_opts():
@@ -605,14 +612,7 @@ async def export_migration_pdf(
                 else "Unassigned"
             )
             svc_status = svc.status.value if hasattr(svc.status, "value") else svc.status
-            phase_progress = []
-            for p in (svc.phases or []):
-                phase_progress.append(p.progress or 0.0)
-            avg_progress = (
-                round(sum(phase_progress) / len(phase_progress), 1)
-                if phase_progress
-                else 0.0
-            )
+            svc_progress = _calc_service_progress(svc)
             data.append([
                 str(idx),
                 Paragraph(svc.name, cell_style),
@@ -621,7 +621,7 @@ async def export_migration_pdf(
                 f"{svc.expected_duration_days or '-'} days",
                 str(svc.start_date or "TBD"),
                 str(svc.end_date or "TBD"),
-                f"{avg_progress}%",
+                f"{svc_progress}%",
             ])
 
         col_widths = [0.4 * inch, 2.0 * inch, 1.4 * inch, 1.0 * inch, 0.9 * inch, 1.0 * inch, 1.0 * inch, 0.8 * inch]
@@ -649,7 +649,7 @@ async def export_migration_pdf(
             )
             elements.append(Spacer(1, 4))
 
-            phase_header = ["Phase", "Status", "Start", "End", "Progress", "Notes"]
+            phase_header = ["Phase", "Status", "Start", "End", "Notes"]
             phase_data = [phase_header]
             for p in (svc.phases or []):
                 pt = p.phase_type.value if hasattr(p.phase_type, "value") else p.phase_type
@@ -659,11 +659,10 @@ async def export_migration_pdf(
                     ps.replace("_", " ").title(),
                     str(p.start_date or "TBD"),
                     str(p.end_date or "TBD"),
-                    f"{p.progress or 0}%",
                     Paragraph(p.notes or "-", cell_style),
                 ])
 
-            phase_col_widths = [1.2 * inch, 1.0 * inch, 1.0 * inch, 1.0 * inch, 0.8 * inch, 3.5 * inch]
+            phase_col_widths = [1.2 * inch, 1.0 * inch, 1.0 * inch, 1.0 * inch, 4.3 * inch]
             phase_table = Table(phase_data, colWidths=phase_col_widths, repeatRows=1)
             phase_table.setStyle(TableStyle([
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#6366f1")),
