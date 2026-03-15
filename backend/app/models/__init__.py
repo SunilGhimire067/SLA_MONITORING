@@ -15,6 +15,7 @@ from app.models.migration import (
     MigrationPhase,
     MigrationDependency,
 )
+from app.models.knowledgebase import KnowledgeBaseArticle
 
 __all__ = [
     "User", "Role",
@@ -28,4 +29,5 @@ __all__ = [
     "AuditLog",
     "Memo",
     "MigrationProject", "MigrationService", "MigrationPhase", "MigrationDependency",
+    "KnowledgeBaseArticle",
 ]

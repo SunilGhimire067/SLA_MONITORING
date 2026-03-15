@@ -16,6 +16,7 @@ from app.api.v1.endpoints import (
     permissions,
     memos,
     migration,
+    knowledgebase,
 )
 
 api_v1_router = APIRouter()
@@ -35,3 +36,4 @@ api_v1_router.include_router(audit.router, prefix="/audit", tags=["Audit & Compl
 api_v1_router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 api_v1_router.include_router(memos.router, prefix="/memos", tags=["Memos"])
 api_v1_router.include_router(migration.router, prefix="/migration", tags=["Migration Planner"])
+api_v1_router.include_router(knowledgebase.router, prefix="/knowledge-base", tags=["Knowledge Base"])

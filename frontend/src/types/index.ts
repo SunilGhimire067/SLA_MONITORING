@@ -250,6 +250,22 @@ export interface MigrationProject {
   updated_at: string;
 }
 
+// Knowledge Base
+export interface KBArticle {
+  id: number;
+  title: string;
+  category: string;
+  subcategory?: string;
+  keywords?: string;
+  problem: string;
+  description?: string;
+  solution: string;
+  author_id: number;
+  author_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface MigrationProjectListItem {
   id: number;
   name: string;

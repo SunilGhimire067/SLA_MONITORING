@@ -18,6 +18,7 @@ import {
   ThunderboltOutlined,
   BookOutlined,
   RocketOutlined,
+  ReadOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -54,6 +55,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       ],
     },
     { key: '/migration', icon: <RocketOutlined />, label: 'Migration Planner', roles: ['admin', 'manager', 'engineer', 'viewer'] },
+    { key: '/knowledge-base', icon: <ReadOutlined />, label: 'Knowledge Base', roles: ['admin', 'manager', 'engineer'] },
     { key: '/memos', icon: <BookOutlined />, label: 'Memos', roles: ['admin', 'manager', 'engineer'] },
     { key: '/notifications', icon: <BellOutlined />, label: 'Notifications', roles: ['admin', 'manager', 'engineer', 'viewer'] },
     { key: '/audit', icon: <AuditOutlined />, label: 'Audit Logs', roles: ['admin', 'manager'] },

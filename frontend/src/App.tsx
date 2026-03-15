@@ -18,6 +18,7 @@ import RolePermissionsPage from './pages/RolePermissionsPage';
 import MemosPage from './pages/MemosPage';
 import MigrationPlannerPage from './pages/MigrationPlannerPage';
 import MigrationProjectDetailPage from './pages/MigrationProjectDetailPage';
+import KnowledgeBasePage from './pages/KnowledgeBasePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -56,6 +57,7 @@ function App() {
                 <Route path="/memos" element={<MemosPage />} />
                 <Route path="/migration" element={<MigrationPlannerPage />} />
                 <Route path="/migration/:id" element={<MigrationProjectDetailPage />} />
+                <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
                 <Route path="/settings" element={<RoleRoute roles={['admin', 'manager']}><SettingsPage /></RoleRoute>} />
               </Routes>
             </Layout>
